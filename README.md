@@ -52,6 +52,13 @@ Once logged in, you can check what your Ubuntu version is by running
 
 `lsb_release -a`
 
+### Installing Hadoop
+
+To install hadoop using a shell script provided in this repository, run
+
+`curl -s https://raw.githubusercontent.com/curran/setupHadoop/master/installHadoop.sh | sh`
+
+
 # Draws from
 # https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-on-ubuntu-13-10
 # http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html
@@ -59,6 +66,7 @@ Once logged in, you can check what your Ubuntu version is by running
 # http://www.alexjf.net/blog/distributed-systems/hadoop-yarn-installation-definitive-guide/
 # https://help.ubuntu.com/community/CheckingYourUbuntuVersion
 # http://www.michael-noll.com/tutorials/running-hadoop-on-ubuntu-linux-multi-node-cluster/
+# https://www.youtube.com/watch?v=3rb111Z9TVI
 
 # Curran Kelleher Feb 2015
 
