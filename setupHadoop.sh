@@ -1,56 +1,8 @@
-# setupHadoop
-Shell scripts and instructions for setting up Hadoop on a cluster. Intended for use with fresh instances of Ubuntu Server 14.04.1 LTS on Amazon EC2. The instructions below show how to set up a 2 node cluster.
+# This script is intended to be run from within a fresh
+# instance of Ubuntu Server 14.04.1 LTS from the user directory.
 
-### Creating Instances
-First, create two virtual machines using the Amazon Web Interface.
-
- * Click through Services -> EC2 -> Instances -> Launch Instance.
- * Select "Ubuntu Server 14.04 LTS (HVM), SSD Volume Type".
- * Click "Review and Launch", then click "Launch".
- * On the dialog "Select an existing key pair...", select "Create a new pair"
- * Enter a name for the key pair (I used "cloudTest")
- * Click "Download Key Pair", which will download "cloudTest.pem"
- * Click "Launch Instance"
- * Click "View Instances" to get back to the instances page.
- * Repeat this process a second time, this time using the existing key pair "cloudTest", to create a second instance.
-
-Once you have created two instances, you can name them by clicking on the empty "Name" field. For example, you can name them "Master" and "Slave", to help keep track of which is which. After doing this, you should see a listing like this:
-
-![Instances](http://curran.github.io/images/setupHadoop/instances.png)
-
-### Connecting to an Instance
-
-In a terminal, go to the directory where "cloudTest.pem" is.
-
-`cd ~/Downloads`
-
-Make sure the key file is not visible to others via ssh.
-
-`chmod 400 cloudTest.pem`
-
-If you don't do this, then you'll see this error later:
-
-```
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-```
-
-Find the public IP of your instance in the AWS Web Interface.
-
-Connect to the instance via SSH using the following command.
-
-`ssh -i cloudTest.pem ubuntu@<your IP here>`
-
-For example,
-
-`ssh -i cloudTest.pem ubuntu@54.67.81.195`
-
-Type "yes" at the prompt `Are you sure you want to continue connecting (yes/no)? yes`
-
-Once logged in, you can check what your Ubuntu version is by running
-
-`lsb_release -a`
+# To check what your Ubuntu version is, you can run
+# lsb_release -a
 
 # Draws from
 # https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-on-ubuntu-13-10
@@ -62,6 +14,28 @@ Once logged in, you can check what your Ubuntu version is by running
 
 # Curran Kelleher Feb 2015
 
+sudo apt-get update
+sudo apt-get install -y default-jdk
+
+# To check what your Java version is, you can run
+# java -version
+
+# Set up SSH keys for Hadoop to use.
+ssh-keygen -t rsa -P ''
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
+
+# Fetch and unzip Hadoop.
+curl -O http://mirror.cogentco.com/pub/apache/hadoop/common/hadoop-2.6.0/hadoop-2.6.0.tar.gz
+tar xfz hadoop-2.6.0.tar.gz
+sudo mv hadoop-2.6.0 /usr/local/hadoop
+rm hadoop-2.6.0.tar.gz
+
+# Set up environment variables.
+echo export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64 >> ~/.bashrc
+echo export HADOOP_PREFIX=/usr/local/hadoop >> ~/.bashrc
+echo export PATH=\$PATH:/usr/local/hadoop/bin >> ~/.bashrc
+echo export PATH=\$PATH:/usr/local/hadoop/sbin >> ~/.bashrc
+source ~/.bashrc
 
 # Manual Steps for Master Node:
 
