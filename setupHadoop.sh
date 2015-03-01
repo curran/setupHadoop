@@ -37,41 +37,9 @@ echo export PATH=\$PATH:/usr/local/hadoop/bin >> ~/.bashrc
 echo export PATH=\$PATH:/usr/local/hadoop/sbin >> ~/.bashrc
 source ~/.bashrc
 
-# Manual Steps for Master Node:
 
-# Edit the file /usr/local/hadoop/etc/hadoop/hadoop-env.sh
-# Change line 25 to be
-# export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
+cp master/* /usr/local/hadoop/etc/hadoop/
 
-# TODO change yarn-env.sh ?
-
-# Edit the file /usr/local/hadoop/etc/hadoop/core-site.xml
-# The bottom of the file should look like this:
-# <configuration>
-#   <property>
-#     <name>fs.default.name</name>
-#     <value>hdfs://localhost:9000</value>
-#   </property>
-# </configuration>
-
-# Edit the file /usr/local/hadoop/etc/hadoop/mapred-site.xml
-# <configuration>
-#   <property>
-#     <name>mapreduce.framework.name</name>
-#     <value>yarn</value>
-#   </property>
-# </configuration>
-
-# Edit the file /usr/local/hadoop/etc/hadoop/yarn-site.xml
-# <configuration>
-#   <property>
-#     <name>yarn.nodemanager.aux-services</name>
-#     <value>mapreduce_shuffle</value>
-#   </property>
-# </configuration>
-
-# If you haven't done the manual steps above,
-# the following commands will fail.
 
 # Format HDFS
 hdfs namenode -format
@@ -111,3 +79,4 @@ start-dfs.sh
 # cat ~/.ssh/id_rsa.pub
 #
 # Copy the results to the clipboard.
+

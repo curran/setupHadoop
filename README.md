@@ -52,12 +52,14 @@ Once logged in, you can check what your Ubuntu version is by running
 
 `lsb_release -a`
 
-### Installing Hadoop
+### Set Up Hadoop
 
-To install hadoop using a shell script provided in this repository, run
+`sudo apt-get install -y git`
+`git clone git@https://github.com/curran/setupHadoop.git`
+`cd setupHadoop`
+`sh installHadoop.sh`
 
-`curl -s https://raw.githubusercontent.com/curran/setupHadoop/master/installHadoop.sh | sh`
-
+Allow all traffic into the master node by scrolling to the right in the AWS instance listing page, clicking the link in the "Security Groups" column -> "Inbound" tab -> "Edit" button -> "Add Rule" button -> change "Custom TCP Rule" to "All TCP" -> "Save" button
 
 # Draws from
 # https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-on-ubuntu-13-10
@@ -69,6 +71,14 @@ To install hadoop using a shell script provided in this repository, run
 # https://www.youtube.com/watch?v=3rb111Z9TVI
 
 # Curran Kelleher Feb 2015
+
+# On Master
+cat ~/.ssh/id_dsa.pub
+
+Copy output
+
+# On Slave
+echo <paste copied output here> > ~/.ssh/authorized_keys
 
 
 # Manual Steps for Master Node:
