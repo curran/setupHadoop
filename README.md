@@ -114,8 +114,35 @@ Choose a single machine to be the master node for HDFS, which will run the NameN
 
 To set up a slave machine, do the following:
 
- * Edit the file `/usr/local/hadoop/etc/hadoop/core-site.xml`
- * Change the `fs.defaultFS` value to use the IP of the master node (found using `ifconfig` ran on the master node). This IP is also listed in the Amazon Web Interface, called "Private IP".
+Edit the file `/usr/local/hadoop/etc/hadoop/core-site.xml`. Change the `fs.defaultFS` value to use the IP of the master node (found using `ifconfig` ran on the master node). This IP is also listed in the Amazon Web Interface, called "Private IP".
+
+The file should look something like this:
+```
+<configuration>
+  <property>
+    <name>fs.default.name</name>
+    <value>hdfs://52.11.95.33:9000</value>
+  </property>
+</configuration>
+```
+
+Edit the file `/usr/local/hadoop/etc/hadoop/yarn-site.xml` to set the same IP as the Resource Manager.
+```
+<configuration>
+  <property>
+    <name>yarn.resourcemanager.hostname</name>
+    <value>52.11.95.33</value>
+  </property>
+</configuration>
+```
+
+With a little luck, you will see the following two pages on your master node:
+
+![workingHDFS](http://curran.github.io/images/setupHadoop/workingHDFS.png)
+A working HDFS cluster with 2 DataNodes. (on port `50070`)
+
+![workingYARN](http://curran.github.io/images/setupHadoop/workingYARN.png)
+A working YARN cluster with 2 NodeManagers. (on port `8088`)
 
 Draws from
 
@@ -129,86 +156,3 @@ Draws from
 
 By Curran Kelleher Feb 2015
 
-# On Master
-cat ~/.ssh/id_dsa.pub
-
-Copy output
-
-# On Slave
-echo <paste copied output here> > ~/.ssh/authorized_keys
-
-
-# Manual Steps for Master Node:
-
-# Edit the file /usr/local/hadoop/etc/hadoop/hadoop-env.sh
-# Change line 25 to be
-# export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64
-
-# TODO change yarn-env.sh ?
-
-# Edit the file /usr/local/hadoop/etc/hadoop/core-site.xml
-# The bottom of the file should look like this:
-# <configuration>
-#   <property>
-#     <name>fs.default.name</name>
-#     <value>hdfs://localhost:9000</value>
-#   </property>
-# </configuration>
-
-# Edit the file /usr/local/hadoop/etc/hadoop/mapred-site.xml
-# <configuration>
-#   <property>
-#     <name>mapreduce.framework.name</name>
-#     <value>yarn</value>
-#   </property>
-# </configuration>
-
-# Edit the file /usr/local/hadoop/etc/hadoop/yarn-site.xml
-# <configuration>
-#   <property>
-#     <name>yarn.nodemanager.aux-services</name>
-#     <value>mapreduce_shuffle</value>
-#   </property>
-# </configuration>
-
-# If you haven't done the manual steps above,
-# the following commands will fail.
-
-# Format HDFS
-hdfs namenode -format
-
-# Start NameNode daemon and DataNode daemon
-start-dfs.sh
-
-# Add a security rule in the AWS Web Interface
-# for allowing all incoming traffic.
-# Under Security Group / Inbound / Edit / Add Rule
-
-# On a given node, you can check to see which
-# daemons are running with the command:
-# jps
-
-# For slave nodes,
-# Edit the file /usr/local/hadoop/etc/hadoop/core-site.xml
-# <configuration>
-#   <property>
-#     <name>fs.default.name</name>
-#     <value>hdfs://52.11.95.33:9000</value>
-#   </property>
-# </configuration>
-
-# For slave nodes,
-# Edit the file /usr/local/hadoop/etc/hadoop/yarn-site.xml
-# <configuration>
-#   <property>
-#     <name>yarn.resourcemanager.hostname</name>
-#     <value>52.11.95.33</value>
-#   </property>
-# </configuration>
-
-# You need to give the master node the ability to talk to the slave
-# over passphraseless SSH. To do this, log into the master node and run
-#
-# cat ~/.ssh/id_rsa.pub
-#
-# Copy the results to the clipboard.
