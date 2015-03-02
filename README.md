@@ -62,23 +62,13 @@ chmod +x installHadoop.sh \
 ./installHadoop.sh
 ```
 
-Allow all traffic into the master node by scrolling to the right in the AWS instance listing page, clicking the link in the "Security Groups" column -> "Inbound" tab -> "Edit" button -> "Add Rule" button -> change "Custom TCP Rule" to "All TCP" -> "Save" button
+We will want to access the Web Interfaces for HDSF and Yarn, which are blocked by default with AWS. Allow all traffic into the master node by scrolling to the right in the AWS instance listing page, clicking the link in the "Security Groups" column -> "Inbound" tab -> "Edit" button -> "Add Rule" button -> change "Custom TCP Rule" to "All TCP" -> "Save" button
 
-# Setting up a cluster
+# Setting up a Cluster
 
-One might think that the simplest approach to setting up a cluster is to first set up many machines as independent single-node Hadoop clusters, make sure each one is working individually, then shut them all down, reconfigure them such that one is a master and the others are slaves, then restart the cluster. Note that you "start the cluster" by starting HDFS and YARN from the _master node only_. The master node will connect to slave nodes via SSH and start the appropriate processes on each, namely DataNode for HDFS and ResourceManager for YARN.
+The approach to setting up a cluster is to first set up many machines as independent single-node Hadoop clusters, then reconfigure them such that one is a master and the others are slaves. Then you need to "start the cluster" by starting HDFS and YARN from the _master node only_. The master node will connect to slave nodes via SSH and start the appropriate processes on each, namely DataNode for HDFS and ResourceManager for YARN.
 
-Once you have set up many single-node clusters, shut them all down by running `stop-dfs.sh` on each machine. The output should look like this:
-
-```
-$ stop-dfs.sh
-Stopping namenodes on [localhost]
-localhost: stopping namenode
-localhost: stopping datanode
-Stopping secondary namenodes
-```
-
-Since the master needs to communicate to slaves over SSH, we need to add the public key of the master machine to the list of allowed hosts in the slave machine(s). To do this:
+Since the master node needs to communicate to slaves over SSH, we need to add the public key of the master machine to the list of allowed hosts in the slave machine(s). To do this:
 
  * Log into the master node over SSH
  * Execute `cat ~/.ssh/id_rsa.pub`
@@ -88,7 +78,9 @@ Since the master needs to communicate to slaves over SSH, we need to add the pub
  * Paste the contents of the clipboard into a new line of the file
  * Save and close the file
 
-## Getting HDFS to work on a cluster
+(There very well may be a nicer way of doing this, please send a pull request if there is!)
+
+## Getting HDFS to Work
 
 Choose a single machine to be the master node for HDFS, which will run the NameNode daemon. All other machines will be slaves, and will run the DataNode daemon.
 
@@ -106,18 +98,16 @@ The file should look something like this:
 </configuration>
 ```
 
-## Control Hadoop
-
 The following commands are defined in `/usr/local/hadoop/bin` and `/usr/local/hadoop/sbin`. They are available as commands to execute because these paths were added to `$PATH` by `setupHadoop.sh`.
 
 Format the file system.
 
-`hdfs namenode -format` WARNING - if you want to set up a cluster, make sure all configurations are set before executing this. If this is executed with config for a single machine, then it seems to break the state of the system and you cannot get the full cluster working.
+`hdfs namenode -format` WARNING - if you want to set up a cluster, make sure all configurations are set before executing this. If this is executed with config for a single machine, then it seems to break the state of the system and you cannot get the full cluster working without starting from scratch.
 
-`start-dfs.sh` Start HDFS. This will launch the NameNode and DataNode Hadoop daemons.
-`stop-dfs.sh` Stop HDFS.
+`start-dfs.sh` Start HDFS. This will launch the NameNode and DataNode Hadoop daemons on the master AND slaves (via SSH).
+`stop-dfs.sh` Stop HDFS on master and slaves.
 
-You can always check to see which daemons are running by executing `jps`. The output will look something like this:
+You can always check to see which daemons are running on a given node by executing `jps`. The output will look something like this:
 
 ```
 $ jps
@@ -131,8 +121,9 @@ Now you should see the following page on port `50070` of your master node:
 ![workingHDFS](http://curran.github.io/images/setupHadoop/workingHDFS.png)
 A working HDFS cluster with 2 DataNodes. (on port `50070`)
 
+# Getting YARN to work
 
-To get YARN working, edit the file `/usr/local/hadoop/etc/hadoop/yarn-site.xml` to set the IP of the Resource Manager. In my case this is the same as the HDFS name node.
+To get YARN working, edit the file `/usr/local/hadoop/etc/hadoop/yarn-site.xml` to set the IP of the Resource Manager (on both master and slave machines). In my case this is the same as the HDFS name node.
 ```
 <configuration>
   <property>
@@ -141,6 +132,13 @@ To get YARN working, edit the file `/usr/local/hadoop/etc/hadoop/yarn-site.xml` 
   </property>
 </configuration>
 ```
+
+Now run
+
+`start-yarn.sh` to start,
+`stop-yarn.sh` to stop.
+
+After starting YARN, you should see the following page on port `8088` of your master node:
 
 ![workingYARN](http://curran.github.io/images/setupHadoop/workingYARN.png)
 A working YARN cluster with 2 NodeManagers. (on port `8088`)
