@@ -55,7 +55,11 @@ Once logged in, you can check what your Ubuntu version is by running
 ## Set Up Hadoop
 
 ```
-sudo apt-get install -y git ; git clone https://github.com/curran/setupHadoop.git ; cd setupHadoop; sh installHadoop.sh
+sudo apt-get install -y git \
+git clone https://github.com/curran/setupHadoop.git \
+cd setupHadoop \
+chmod +x installHadoop.sh \
+./installHadoop.sh
 ```
 
 Allow all traffic into the master node by scrolling to the right in the AWS instance listing page, clicking the link in the "Security Groups" column -> "Inbound" tab -> "Edit" button -> "Add Rule" button -> change "Custom TCP Rule" to "All TCP" -> "Save" button
