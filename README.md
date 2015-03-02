@@ -1,7 +1,7 @@
 # setupHadoop
 Shell scripts and instructions for setting up Hadoop on a cluster. Intended for use with fresh instances of Ubuntu Server 14.04.1 LTS on Amazon EC2. The instructions below show how to set up a 2 node cluster.
 
-### Creating Instances
+## Creating Instances
 First, create two virtual machines using the Amazon Web Interface.
 
  * Click through Services -> EC2 -> Instances -> Launch Instance.
@@ -18,7 +18,7 @@ Once you have created two instances, you can name them by clicking on the empty 
 
 ![Instances](http://curran.github.io/images/setupHadoop/instances.png)
 
-### Connecting to an Instance
+## Connecting to an Instance
 
 In a terminal, go to the directory where "cloudTest.pem" is.
 
@@ -52,7 +52,7 @@ Once logged in, you can check what your Ubuntu version is by running
 
 `lsb_release -a`
 
-### Set Up Hadoop
+## Set Up Hadoop
 
 ```
 sudo apt-get install -y git
@@ -62,16 +62,70 @@ cd setupHadoop; sh installHadoop.sh
 
 Allow all traffic into the master node by scrolling to the right in the AWS instance listing page, clicking the link in the "Security Groups" column -> "Inbound" tab -> "Edit" button -> "Add Rule" button -> change "Custom TCP Rule" to "All TCP" -> "Save" button
 
-# Draws from
-# https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-on-ubuntu-13-10
-# http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html
-# http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/SingleCluster.html
-# http://www.alexjf.net/blog/distributed-systems/hadoop-yarn-installation-definitive-guide/
-# https://help.ubuntu.com/community/CheckingYourUbuntuVersion
-# http://www.michael-noll.com/tutorials/running-hadoop-on-ubuntu-linux-multi-node-cluster/
-# https://www.youtube.com/watch?v=3rb111Z9TVI
+## Control Hadoop
 
-# Curran Kelleher Feb 2015
+The following commands are defined in `/usr/local/hadoop/bin` and `/usr/local/hadoop/sbin`. They are available as commands to execute because these paths were added to `$PATH` by `setupHadoop.sh`.
+
+Format the file system.
+
+`hdfs namenode -format`
+
+`start-dfs.sh` Start HDFS. This will launch the NameNode and DataNode Hadoop daemons.
+`stop-dfs.sh` Stop HDFS.
+
+You can always check to see which daemons are running by executing `jps`. The output will look something like this:
+
+```
+$ jps
+11296 NameNode
+11453 DataNode
+11768 Jps
+```
+
+# Setting up a cluster
+
+Perhaps the simplest approach to setting up a cluster is to first set up many machines as independent single-node Hadoop clusters, make sure each one is working individually, then shut them all down, reconfigure them such that one is a master and the others are slaves, then restart the cluster. Note that you "start the cluster" by starting HDFS and YARN from the _master node only_. The master node will connect to slave nodes via SSH and start the appropriate processes on each, namely DataNode for HDFS and ResourceManager for YARN.
+
+Once you have set up many single-node clusters, shut them all down by running `stop-dfs.sh` on each machine. The output should look like this:
+
+```
+$ stop-dfs.sh
+Stopping namenodes on [localhost]
+localhost: stopping namenode
+localhost: stopping datanode
+Stopping secondary namenodes
+```
+
+Since the master needs to communicate to slaves over SSH, we need to add the public key of the master machine to the list of allowed hosts in the slave machine(s). To do this:
+
+ * Log into the master node over SSH
+ * Execute `cat ~/.ssh/id_rsa.pub`
+ * Copy the output to the clipboard
+ * Log into the slave node over SSH
+ * Edit the file `~/.ssh/authorized_keys`
+ * Paste the contents of the clipboard into a new line of the file
+ * Save and close the file
+
+## Getting HDFS to work on a cluster
+
+Choose a single machine to be the master node for HDFS, which will run the NameNode daemon. All other machines will be slaves, and will run the DataNode daemon.
+
+To set up a slave machine, do the following:
+
+ * Edit the file `/usr/local/hadoop/etc/hadoop/core-site.xml`
+ * Change the `fs.defaultFS` value to use the IP of the master node (found using `ifconfig` ran on the master node). This IP is also listed in the Amazon Web Interface, called "Private IP".
+
+Draws from
+
+ * https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-on-ubuntu-13-10
+ * http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html
+ * http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/SingleCluster.html
+ * http://www.alexjf.net/blog/distributed-systems/hadoop-yarn-installation-definitive-guide/
+ * https://help.ubuntu.com/community/CheckingYourUbuntuVersion
+ * http://www.michael-noll.com/tutorials/running-hadoop-on-ubuntu-linux-multi-node-cluster/
+ * https://www.youtube.com/watch?v=3rb111Z9TVI
+
+By Curran Kelleher Feb 2015
 
 # On Master
 cat ~/.ssh/id_dsa.pub

@@ -1,19 +1,9 @@
 # This script is intended to be run from within a fresh
 # instance of Ubuntu Server 14.04.1 LTS from the user directory.
 
-# To check what your Ubuntu version is, you can run
-# lsb_release -a
-
-# Draws from
-# https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-on-ubuntu-13-10
-# http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/ClusterSetup.html
-# http://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/SingleCluster.html
-# http://www.alexjf.net/blog/distributed-systems/hadoop-yarn-installation-definitive-guide/
-# https://help.ubuntu.com/community/CheckingYourUbuntuVersion
-# http://www.michael-noll.com/tutorials/running-hadoop-on-ubuntu-linux-multi-node-cluster/
-
 # Curran Kelleher Feb 2015
 
+# Install Java
 sudo apt-get update
 sudo apt-get install -y default-jdk
 
@@ -21,7 +11,7 @@ sudo apt-get install -y default-jdk
 # java -version
 
 # Set up SSH keys for Hadoop to use.
-ssh-keygen -t rsa -P ''
+ssh-keygen -t dsa -P '' -f ~/.ssh/id_dsa
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys
 
 # Fetch and unzip Hadoop.
@@ -37,7 +27,7 @@ echo export PATH=\$PATH:/usr/local/hadoop/bin >> ~/.bashrc
 echo export PATH=\$PATH:/usr/local/hadoop/sbin >> ~/.bashrc
 source ~/.bashrc
 
-
+# Copy configuration files for master node.
 cp master/* /usr/local/hadoop/etc/hadoop/
 
 

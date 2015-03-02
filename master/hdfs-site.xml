@@ -18,9 +18,10 @@
 
 <configuration>
     <property>
-        <name>dfs.replication</name>
 
-        <!-- This number should be how many machines are in the cluster. -->
+        <!-- This is the number of times each block in HDFS is replicated across the cluster. -->
+        <!-- See http://stackoverflow.com/questions/12835396/hadoop-dfs-replicate -->
+        <name>dfs.replication</name>
         <value>1</value>
     </property>
 </configuration>
