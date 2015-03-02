@@ -22,3 +22,6 @@ echo export HADOOP_PREFIX=/usr/local/hadoop >> ~/.bashrc
 echo export PATH=\$PATH:/usr/local/hadoop/bin >> ~/.bashrc
 echo export PATH=\$PATH:/usr/local/hadoop/sbin >> ~/.bashrc
 source ~/.bashrc
+
+# Copy config files into Hadoop directory.
+cp -r master/* /usr/local/hadoop/etc/hadoop/
