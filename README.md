@@ -64,29 +64,9 @@ chmod +x installHadoop.sh \
 
 Allow all traffic into the master node by scrolling to the right in the AWS instance listing page, clicking the link in the "Security Groups" column -> "Inbound" tab -> "Edit" button -> "Add Rule" button -> change "Custom TCP Rule" to "All TCP" -> "Save" button
 
-## Control Hadoop
-
-The following commands are defined in `/usr/local/hadoop/bin` and `/usr/local/hadoop/sbin`. They are available as commands to execute because these paths were added to `$PATH` by `setupHadoop.sh`.
-
-Format the file system.
-
-`hdfs namenode -format`
-
-`start-dfs.sh` Start HDFS. This will launch the NameNode and DataNode Hadoop daemons.
-`stop-dfs.sh` Stop HDFS.
-
-You can always check to see which daemons are running by executing `jps`. The output will look something like this:
-
-```
-$ jps
-11296 NameNode
-11453 DataNode
-11768 Jps
-```
-
 # Setting up a cluster
 
-Perhaps the simplest approach to setting up a cluster is to first set up many machines as independent single-node Hadoop clusters, make sure each one is working individually, then shut them all down, reconfigure them such that one is a master and the others are slaves, then restart the cluster. Note that you "start the cluster" by starting HDFS and YARN from the _master node only_. The master node will connect to slave nodes via SSH and start the appropriate processes on each, namely DataNode for HDFS and ResourceManager for YARN.
+One might think that the simplest approach to setting up a cluster is to first set up many machines as independent single-node Hadoop clusters, make sure each one is working individually, then shut them all down, reconfigure them such that one is a master and the others are slaves, then restart the cluster. Note that you "start the cluster" by starting HDFS and YARN from the _master node only_. The master node will connect to slave nodes via SSH and start the appropriate processes on each, namely DataNode for HDFS and ResourceManager for YARN.
 
 Once you have set up many single-node clusters, shut them all down by running `stop-dfs.sh` on each machine. The output should look like this:
 
@@ -126,7 +106,33 @@ The file should look something like this:
 </configuration>
 ```
 
-Edit the file `/usr/local/hadoop/etc/hadoop/yarn-site.xml` to set the same IP as the Resource Manager.
+## Control Hadoop
+
+The following commands are defined in `/usr/local/hadoop/bin` and `/usr/local/hadoop/sbin`. They are available as commands to execute because these paths were added to `$PATH` by `setupHadoop.sh`.
+
+Format the file system.
+
+`hdfs namenode -format` WARNING - if you want to set up a cluster, make sure all configurations are set before executing this. If this is executed with config for a single machine, then it seems to break the state of the system and you cannot get the full cluster working.
+
+`start-dfs.sh` Start HDFS. This will launch the NameNode and DataNode Hadoop daemons.
+`stop-dfs.sh` Stop HDFS.
+
+You can always check to see which daemons are running by executing `jps`. The output will look something like this:
+
+```
+$ jps
+11296 NameNode
+11453 DataNode
+11768 Jps
+```
+
+Now you should see the following page on port `50070` of your master node:
+
+![workingHDFS](http://curran.github.io/images/setupHadoop/workingHDFS.png)
+A working HDFS cluster with 2 DataNodes. (on port `50070`)
+
+
+To get YARN working, edit the file `/usr/local/hadoop/etc/hadoop/yarn-site.xml` to set the IP of the Resource Manager. In my case this is the same as the HDFS name node.
 ```
 <configuration>
   <property>
@@ -135,11 +141,6 @@ Edit the file `/usr/local/hadoop/etc/hadoop/yarn-site.xml` to set the same IP as
   </property>
 </configuration>
 ```
-
-With a little luck, you will see the following two pages on your master node:
-
-![workingHDFS](http://curran.github.io/images/setupHadoop/workingHDFS.png)
-A working HDFS cluster with 2 DataNodes. (on port `50070`)
 
 ![workingYARN](http://curran.github.io/images/setupHadoop/workingYARN.png)
 A working YARN cluster with 2 NodeManagers. (on port `8088`)
@@ -154,5 +155,4 @@ Draws from
  * http://www.michael-noll.com/tutorials/running-hadoop-on-ubuntu-linux-multi-node-cluster/
  * https://www.youtube.com/watch?v=3rb111Z9TVI
 
-By Curran Kelleher Feb 2015
-
+By Curran Kelleher March 2015
