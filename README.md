@@ -54,12 +54,30 @@ Once logged in, you can check what your Ubuntu version is by running
 
 ## Set Up Hadoop
 
+Copy and paste this entire script into your console after logging into an instance. This should be done for all machines in the cluster.
+
 ```
-sudo apt-get install -y git \
-git clone https://github.com/curran/setupHadoop.git \
-cd setupHadoop \
-chmod +x installHadoop.sh \
-./installHadoop.sh
+sudo apt-get update;\
+sudo apt-get install -y git default-jdk;\
+curl -O http://mirror.cogentco.com/pub/apache/hadoop/common/hadoop-2.6.0/hadoop-2.6.0.tar.gz;\
+tar xfz hadoop-2.6.0.tar.gz;\
+sudo mv hadoop-2.6.0 /usr/local/hadoop;\
+rm hadoop-2.6.0.tar.gz;\
+ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa;\
+cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys;\
+echo export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64 >> ~/.bashrc;\
+echo export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop >> ~/.bashrc;\
+echo export PATH=\$PATH:/usr/local/hadoop/bin >> ~/.bashrc;\
+echo export PATH=\$PATH:/usr/local/hadoop/sbin >> ~/.bashrc;\
+source ~/.bashrc
+```
+
+For the master, copy these config files into Hadoop directory.
+
+```
+git clone https://github.com/curran/setupHadoop.git; \
+cd setupHadoop; \
+cp -r master/* $HADOOP_CONF_DIR
 ```
 
 We will want to access the Web Interfaces for HDSF and Yarn, which are blocked by default with AWS. Allow all traffic into the master node by scrolling to the right in the AWS instance listing page, clicking the link in the "Security Groups" column -> "Inbound" tab -> "Edit" button -> "Add Rule" button -> change "Custom TCP Rule" to "All TCP" -> "Save" button
@@ -105,6 +123,7 @@ Format the file system.
 `hdfs namenode -format` WARNING - if you want to set up a cluster, make sure all configurations are set before executing this. If this is executed with config for a single machine, then it seems to break the state of the system and you cannot get the full cluster working without starting from scratch.
 
 `start-dfs.sh` Start HDFS. This will launch the NameNode and DataNode Hadoop daemons on the master AND slaves (via SSH).
+
 `stop-dfs.sh` Stop HDFS on master and slaves.
 
 You can always check to see which daemons are running on a given node by executing `jps`. The output will look something like this:
@@ -142,6 +161,36 @@ After starting YARN, you should see the following page on port `8088` of your ma
 
 ![workingYARN](http://curran.github.io/images/setupHadoop/workingYARN.png)
 A working YARN cluster with 2 NodeManagers. (on port `8088`)
+
+### Reformatting HDFS
+
+If your HDFS somehow gets corrupted, you can reformat everything like this:
+
+`stop-yarn.sh`
+`stop-dfs.sh`
+`rm -r -f /tmp/hadoop-ubuntu/*` on all machines.
+`hdfs namenode -format` on master.
+`start-dfs.sh`
+`start-yarn.sh`
+
+### Notes
+
+When trying to run a Spark shell in YARN with the following command
+
+``
+
+The YARN application initializes (I can see it in the YARN Web UI), but I get the following error after about 10 seconds:
+
+```
+15/03/04 00:32:35 WARN remote.ReliableDeliverySupervisor: Association with remote system [akka.tcp://sparkYarnAM@ip-172-31-4-232.us-west-1.compute.internal:57241] has failed, address is now gated for [5000] ms. Reason is: [Disassociated].
+```
+
+This seems to be [related to RAM capacity](http://stackoverflow.com/questions/28671171/spark-shell-cannot-connect-to-yarn). I am using AWS Micro instances that have only 1GB of RAM. Using the following command will show you memory usage every second on a given machine:
+
+`watch -n 1 free -m`
+
+The free memory was falling to around 60MB when the YARN connection gets "dissociated".
+
 
 Draws from
 
