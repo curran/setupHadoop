@@ -196,6 +196,15 @@ To get the Spark Shell to work on YARN on my Mac laptop, I experienced the same 
 
 `sudo ln -s /usr/bin/java /bin/java`
 
+What finally worked in the Spark Shell in YARN-client mode:
+
+```
+val data = sc.textFile("hdfs://localhost:9000/data/adult/data.csv")
+data.first()
+```
+
+Note the port 9000 in the hdfs URL. If no port is specified, the system assumes post 8020 (as listed in the [default HDFS ports](https://ambari.apache.org/1.2.3/installing-hadoop-using-ambari/content/reference_chap2_1.html)), which is not the default used by HDFS. The default is 9000.
+
 Draws from
 
  * https://www.digitalocean.com/community/tutorials/how-to-install-hadoop-on-ubuntu-13-10
