@@ -192,6 +192,9 @@ This seems to be [related to RAM capacity](http://stackoverflow.com/questions/28
 
 The free memory was falling to around 60MB when the YARN connection gets "dissociated".
 
+To get the Spark Shell to work on YARN on my Mac laptop, I experienced the same error as described in the blog post [YARN Job Problem: Application application_** failed 1 times due to AM Container for XX exited with exitCode: 127](https://cloudcelebrity.wordpress.com/2014/01/31/yarn-job-problem-application-application_-failed-1-times-due-to-am-container-for-xx-exited-with-exitcode-127/) and applied his solution:
+
+`sudo ln -s /usr/bin/java /bin/java`
 
 Draws from
 
