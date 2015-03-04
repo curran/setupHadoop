@@ -67,6 +67,7 @@ ssh-keygen -t rsa -P '' -f ~/.ssh/id_rsa;\
 cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys;\
 echo export JAVA_HOME=/usr/lib/jvm/java-7-openjdk-amd64 >> ~/.bashrc;\
 echo export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop >> ~/.bashrc;\
+echo export YARN_CONF_DIR=/usr/local/hadoop/etc/hadoop >> ~/.bashrc;\
 echo export PATH=\$PATH:/usr/local/hadoop/bin >> ~/.bashrc;\
 echo export PATH=\$PATH:/usr/local/hadoop/sbin >> ~/.bashrc;\
 source ~/.bashrc
@@ -177,7 +178,7 @@ If your HDFS somehow gets corrupted, you can reformat everything like this:
 
 When trying to run a Spark shell in YARN with the following command
 
-``
+`./bin/spark-shell --master yarn-client`
 
 The YARN application initializes (I can see it in the YARN Web UI), but I get the following error after about 10 seconds:
 
