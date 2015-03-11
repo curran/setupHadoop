@@ -167,12 +167,14 @@ A working YARN cluster with 2 NodeManagers. (on port `8088`)
 
 If your HDFS somehow gets corrupted, you can reformat everything like this:
 
-`stop-yarn.sh`
-`stop-dfs.sh`
-`rm -r -f /tmp/hadoop-ubuntu/*` on all machines.
-`hdfs namenode -format` on master.
-`start-dfs.sh`
-`start-yarn.sh`
+```
+stop-yarn.sh
+stop-dfs.sh
+rm -r -f /tmp/hadoop-ubuntu/* # do this on all machines
+hdfs namenode -format # do this on master
+start-dfs.sh
+start-yarn.sh
+```
 
 ### Notes
 
